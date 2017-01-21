@@ -1,0 +1,1 @@
+- Add support for br (Brotli), commonly used for webfonts
