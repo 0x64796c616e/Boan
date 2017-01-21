@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys
 import os
 from time import sleep
@@ -8,9 +10,8 @@ from urllib.parse import urlparse
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.QtCore import *
-from PyQt5.QtCore import QThread
 
-qtCreatorFile = "boan.ui" #Qt XML ui file.
+qtCreatorFile = "g.ui" #Qt XML ui file.
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
  
 waitCondition = QWaitCondition()
