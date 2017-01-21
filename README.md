@@ -3,9 +3,7 @@ Boan - 보안 - a Korean word meaning security or the preservation of public pea
 
 Boan is a HTTP/HTTPS proxy with easily extensible request and response handlers.
 
-## Features
+## Installation
 
 ## Usage
-
-## Enabling HTTPS interception
 
