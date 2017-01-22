@@ -13,7 +13,7 @@ from PyQt5.QtCore import *
 
 qtCreatorFile = "g.ui" #Qt XML ui file.
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
- 
+
 waitCondition = QWaitCondition()
 mutex = QMutex()
 
@@ -32,9 +32,8 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.px.reqsignal.connect(self.handle_reqsignal)
 
     def handleButton_forward(self):
-        self.px.update_req = "this is some text"
         self.pushButton_forward.setEnabled(False)
-        self.px.req.path = self.box_body.toPlainText()
+        #self.px.req.path = self.box_body.toPlainText()
         self.box_body.clear()
         self.wakeup()
         return
@@ -50,14 +49,20 @@ class MyApp(QMainWindow, Ui_MainWindow):
             self.pushButton_power.setText("Run")
             self.spinBox_port.setEnabled(True)
             self.pushButton_forward.setEnabled(False)
-    
+
     def update_statusbar(self,msg,msec):
         self.statusbar.clearMessage()
         self.statusbar.showMessage(msg,msec)
 
     def handle_reqsignal(self):
         self.pushButton_forward.setEnabled(True)
-        self.box_body.appendPlainText(self.px.req.path);
+        #self.box_body.appendPlainText(self.px.req.path);
+        self.box_body.appendPlainText(self.px.req.command+" "+self.px.req.path+" "+self.px.req.protocol_version);
+        for h in self.px.req.headers:
+            self.box_body.appendPlainText(h+": "+self.px.req.headers[h])
+        self.box_body.appendPlainText("") # newline
+        if self.px.req_body:
+            self.box_body.appendPlainText(self.px.req_body.decode("utf-8"))
 
     def wakeup(self):
         waitCondition.wakeAll()
@@ -71,8 +76,8 @@ class PX(proxy.ProxyRequestHandler):
         mutex.lock()
         waitCondition.wait(mutex)
         mutex.unlock()
-        req = self.pt.req
-        req_body = self.pt.req_body
+        #req = self.pt.req
+        #req_body = self.pt.req_body
         pass
 
     def wakey(self):
@@ -81,17 +86,17 @@ class PX(proxy.ProxyRequestHandler):
     def sayhi(msg="hey there"):
         print(msg)
 
-class ProxyThread(QThread): 
+class ProxyThread(QThread):
     port = 8080
-    statusbarsignal = pyqtSignal(str,int) 
-    reqsignal = pyqtSignal() 
-    updsignal = pyqtSignal(str) 
+    statusbarsignal = pyqtSignal(str,int)
+    reqsignal = pyqtSignal()
+    updsignal = pyqtSignal(str)
     req = None
     req_body = None
 
     def __setitem__(self, key, item):
         self.__dict__[key] = item
-    
+
     def run(self):
         HandlerClass=PX
         ServerClass=proxy.ThreadingHTTPServer
@@ -107,13 +112,13 @@ class ProxyThread(QThread):
         self.httpd = ServerClass(server_address, HandlerClass)
 
         sa = self.httpd.socket.getsockname()
-        
+
         self.statusbarsignal.emit("Listening on "+sa[0]+" port "+str(sa[1])+"...",0)
         self.httpd.serve_forever()
 
     def stop(self):
         self.httpd.server_close()
-        self.terminate()    
+        self.terminate()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

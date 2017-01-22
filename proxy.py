@@ -72,7 +72,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
 
         self.wfile.write(bytes("%s %d %s\r\n\n" % (self.protocol_version, 200, 'Connection Established'),"utf-8"))
         #self.wfile.write(bytes("HTTP/1.1 200 Connection established\r\n\r\n","utf-8"))
-        
+
         self.connection = ssl.wrap_socket(self.connection, keyfile=self.certkey, certfile=certpath,  suppress_ragged_eofs=True,server_side=True)
         self.rfile = self.connection.makefile("rb", self.rbufsize)
         self.wfile = self.connection.makefile("wb", self.wbufsize)
@@ -161,7 +161,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 with self.lock:
                     self.save_handler(req, req_body, res, '')
                 return
-            
+
             res_body = res.read()
         except Exception as e:
             if origin in self.tls.conns:
@@ -187,7 +187,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         for k,v in res.headers.items():
             self.send_header(k,v)
         self.end_headers()
-        try:  
+        try:
             self.wfile.write(res_body)
         except Exception as e:
             #print("error")
