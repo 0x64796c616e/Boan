@@ -33,7 +33,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
 
     def handleButton_forward(self):
         self.pushButton_forward.setEnabled(False)
-        #self.px.req.path = self.box_body.toPlainText()
+        self.px.raw_req = self.box_body.toPlainText() 
         self.box_body.clear()
         self.wakeup()
         return
@@ -55,14 +55,13 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.statusbar.showMessage(msg,msec)
 
     def handle_reqsignal(self):
-        self.pushButton_forward.setEnabled(True)
-        #self.box_body.appendPlainText(self.px.req.path);
         self.box_body.appendPlainText(self.px.req.command+" "+self.px.req.path+" "+self.px.req.protocol_version);
         for h in self.px.req.headers:
             self.box_body.appendPlainText(h+": "+self.px.req.headers[h])
         self.box_body.appendPlainText("") # newline
         if self.px.req_body:
             self.box_body.appendPlainText(self.px.req_body.decode("utf-8"))
+        self.pushButton_forward.setEnabled(True)
 
     def wakeup(self):
         waitCondition.wakeAll()
@@ -73,18 +72,36 @@ class PX(proxy.ProxyRequestHandler):
         self.reqsignal.emit()
         self.pt.req = req
         self.pt.req_body = req_body
+
         mutex.lock()
         waitCondition.wait(mutex)
         mutex.unlock()
-        #req = self.pt.req
-        #req_body = self.pt.req_body
-        pass
+        
+        # Parse the raw request and map onto the httpreq object
+        raw = self.pt.raw_req.split('\n')
+        try:  
+            req.command, req.path, req.protocol_version = raw[0].split()
+        except Exception as e:
+            self.send_error(400)
+        
+        for c in range(1,len(raw)):
+            #print(c,raw[c])
+            if raw[c] == '': # the newline
+                break
+            try:  
+                h,v = raw[c].split(': ')
+            except Exception as e:
+                self.send_error(400)
+
+            del req.headers[h]
+            req.headers[h] = v
+
+        req_body = bytes('\n'.join(raw[c+1:]),"utf-8")
+
+        return req_body
 
     def wakey(self):
         self.wakeup()
-
-    def sayhi(msg="hey there"):
-        print(msg)
 
 class ProxyThread(QThread):
     port = 8080
@@ -93,6 +110,7 @@ class ProxyThread(QThread):
     updsignal = pyqtSignal(str)
     req = None
     req_body = None
+    raw_req = None
 
     def __setitem__(self, key, item):
         self.__dict__[key] = item

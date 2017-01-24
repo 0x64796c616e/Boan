@@ -130,6 +130,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             return
         elif req_body_modified is not None:
             req_body = req_body_modified
+            del req.headers['Content-length']
             req.headers['Content-length'] = str(len(req_body))
 
         u = urllib.parse.urlsplit(req.path)
