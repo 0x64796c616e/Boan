@@ -1,3 +1,7 @@
-- Add support for br (Brotli) compression, commonly used for webfonts https://github.com/google/brotli/tree/master/python
-- Create a deb installer
+- Add support for br (Brotli) compression
+	commonly used for webfonts https://github.com/google/brotli/tree/master/python
+
 - add feature: ignore certain extensions like .css or jpeg
+
+- Create a deb installer
+	https://pypi.python.org/pypi/stdeb#python-3-support
