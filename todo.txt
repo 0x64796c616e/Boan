@@ -1,1 +1,2 @@
-- Add support for br (Brotli), commonly used for webfonts
+- Add support for br (Brotli) compression, commonly used for webfonts https://github.com/google/brotli/tree/master/python
+- Create a deb installer

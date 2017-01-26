@@ -109,7 +109,8 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 other.sendall(data)
 
     def do_GET(self):
-        if self.path == 'http://proxy2.test/':
+        if "boan.cert" in self.path:
+            print("Send the cert")
             self.send_cacert()
             return
 
@@ -269,7 +270,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         with open(self.cacert, 'rb') as f:
             data = f.read()
 
-        self.wfile.write("%s %d %s\r\n" % (self.protocol_version, 200, 'OK'))
+        self.wfile.write(bytes("%s %d %s\r\n" % (self.protocol_version, 200, 'OK'),"utf-8"))
         self.send_header('Content-Type', 'application/x-x509-ca-cert')
         self.send_header('Content-Length', len(data))
         self.send_header('Connection', 'close')
