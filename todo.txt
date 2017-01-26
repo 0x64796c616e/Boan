@@ -5,3 +5,5 @@
 
 - Create a deb installer
 	https://pypi.python.org/pypi/stdeb#python-3-support
+
+- add git .ignore for the certificates in the certs/ directory
