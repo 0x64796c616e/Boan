@@ -32,6 +32,9 @@
           <height>0</height>
          </size>
         </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
         <property name="maximum">
          <number>65536</number>
         </property>

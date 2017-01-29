@@ -9,10 +9,12 @@ from urllib.parse import urlparse
 ### GUI ###
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 
-qtCreatorFile = "g.ui" #Qt XML ui file.
-Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
+mainwindow_ui_file = "g.ui" #Qt XML ui file.
+Ui_MainWindow, QtBaseClass = uic.loadUiType(mainwindow_ui_file)
 
 waitCondition = QWaitCondition()
 mutex = QMutex()
@@ -26,10 +28,20 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.connect()
 
     def connect(self):
+        self.shortcut_quit = QShortcut(QKeySequence("Ctrl+Q"), self)
+        self.shortcut_quit.activated.connect(self.on_quit)
+        self.actionPreferences.triggered.connect(self.do_preferences)
+
         self.pushButton_forward.clicked.connect(self.handleButton_forward)
         self.pushButton_power.clicked[bool].connect(self.handleButton_power)
         self.px.statusbarsignal.connect(self.update_statusbar)
         self.px.reqsignal.connect(self.handle_reqsignal)
+
+    def do_preferences(self):
+        print("Opening Preferences")
+
+    def on_quit(self):
+        self.close()
 
     def handleButton_forward(self):
         self.pushButton_forward.setEnabled(False)
@@ -55,6 +67,9 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.statusbar.showMessage(msg,msec)
 
     def handle_reqsignal(self):
+        self.raise_()
+        self.show()
+        self.activateWindow()
         self.box_body.appendPlainText(self.px.req.command+" "+self.px.req.path+" "+self.px.req.protocol_version);
         for h in self.px.req.headers:
             self.box_body.appendPlainText(h+": "+self.px.req.headers[h])
@@ -79,6 +94,7 @@ class PX(proxy.ProxyRequestHandler):
         
         # Parse the raw request and map onto the httpreq object
         raw = self.pt.raw_req.split('\n')
+        req.raw_req = self.pt.raw_req
         try:  
             req.command, req.path, req.protocol_version = raw[0].split()
         except Exception as e:

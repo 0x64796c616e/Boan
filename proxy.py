@@ -126,6 +126,9 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         with self.lock:
             req_body_modified = self.request_handler(req, req_body)
 
+        if req.raw_req != None:
+            print(req.raw_req)
+
         if req_body_modified is False:
             self.send_error(403)
             return
