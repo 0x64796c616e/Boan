@@ -90,3 +90,4 @@ ENV/
 
 # Ignore the generated certs in the certs/ directory 
 certs/*
+!*.gitkeep
