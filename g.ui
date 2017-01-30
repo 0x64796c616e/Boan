@@ -126,7 +126,7 @@
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionAbout_Boan"/>
+    <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -141,7 +141,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionQuit">
    <property name="text">
-    <string>Quit</string>
+    <string>Quit (CTRL+Q)</string>
    </property>
   </action>
   <action name="actionPreferences">
@@ -149,7 +149,7 @@
     <string>Preferences</string>
    </property>
   </action>
-  <action name="actionAbout_Boan">
+  <action name="actionAbout">
    <property name="text">
     <string>About Boan</string>
    </property>

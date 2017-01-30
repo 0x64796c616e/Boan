@@ -19,6 +19,26 @@ Ui_MainWindow, QtBaseClass = uic.loadUiType(mainwindow_ui_file)
 waitCondition = QWaitCondition()
 mutex = QMutex()
 
+class PreferencesWindow(QDialog):
+    def __init__(self):
+        super(PreferencesWindow, self).__init__()
+        uic.loadUi('preferences.ui', self)
+        self.show()
+
+    def accept(self):
+        print("Clicked save")
+        self.close()
+
+class AboutWindow(QDialog):
+    def __init__(self):
+        super(AboutWindow, self).__init__()
+        uic.loadUi('about.ui', self)
+        self.show()
+
+    def accept(self):
+        print("Clicked save")
+        self.close()
+
 class MyApp(QMainWindow, Ui_MainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
@@ -26,19 +46,33 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.px = ProxyThread() # Proxy Qthread
         self.connect()
+        self.centerOnScreen()
 
     def connect(self):
         self.shortcut_quit = QShortcut(QKeySequence("Ctrl+Q"), self)
         self.shortcut_quit.activated.connect(self.on_quit)
         self.actionPreferences.triggered.connect(self.do_preferences)
+        self.actionAbout.triggered.connect(self.do_about)
 
         self.pushButton_forward.clicked.connect(self.handleButton_forward)
         self.pushButton_power.clicked[bool].connect(self.handleButton_power)
         self.px.statusbarsignal.connect(self.update_statusbar)
         self.px.reqsignal.connect(self.handle_reqsignal)
 
+    def centerOnScreen (self):
+        '''centerOnScreen() Centers the window on the screen.'''
+        resolution = QDesktopWidget().screenGeometry()
+        self.move((resolution.width() / 2) - (self.frameSize().width() / 2),(resolution.height() / 2) - (self.frameSize().height() / 2))
+    
     def do_preferences(self):
         print("Opening Preferences")
+        dlg = PreferencesWindow()
+        dlg.exec_()
+
+    def do_about(self):
+        print("Opening Preferences")
+        dlg = AboutWindow()
+        dlg.exec_()
 
     def on_quit(self):
         self.close()
@@ -70,6 +104,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.raise_()
         self.show()
         self.activateWindow()
+
         self.box_body.appendPlainText(self.px.req.command+" "+self.px.req.path+" "+self.px.req.protocol_version);
         for h in self.px.req.headers:
             self.box_body.appendPlainText(h+": "+self.px.req.headers[h])

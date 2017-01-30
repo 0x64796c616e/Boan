@@ -126,9 +126,6 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         with self.lock:
             req_body_modified = self.request_handler(req, req_body)
 
-        if req.raw_req != None:
-            print(req.raw_req)
-
         if req_body_modified is False:
             self.send_error(403)
             return
@@ -152,7 +149,20 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 else:
                     self.tls.conns[origin] = http.client.HTTPConnection(netloc, timeout=self.timeout)
             conn = self.tls.conns[origin]
+
+            #if req.raw_req != None:
+            #    print("raw")
+            #    reqq = "GET http://example.com/ HTTP/1.1\nHost: example.com\nUser-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate\nConnection: keep-alive\nUpgrade-Insecure-Requests: 1\nCache-Control: max-age=0\n"
+            #    reqq = reqq.replace('\n', '\r\n')
+            #    reqq += "\r\n"
+            #    print(repr(reqq))
+            #    conn.connect()
+            #    conn.send(bytes(reqq,"utf-8"))
+            # As an alternative to using the request() method described above, you can also send your request step by step, by using the four functions below.
+            # https://docs.python.org/3.0/library/http.client.html
+            #else:
             conn.request(self.command, path, req_body, dict(req.headers))
+
             res = conn.getresponse()
             version_table = {10: 'HTTP/1.0', 11: 'HTTP/1.1'}
             setattr(res, 'headers', res.msg)
@@ -188,6 +198,19 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
 
         setattr(res, 'headers', self.filter_headers(res.headers))
 
+        #if req.raw_req != None:
+        #    print("sent raw")
+#
+        #   
+         #reqq = "GET http://example.com/ HTTP/1.1\nHost: example.com\nUser-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\nAccept-Language: en-US,en;q=0.5\nAccept-Encoding: gzip, deflate\nConnection: keep-alive\nUpgrade-Insecure-Requests: 1\nCache-Control: max-age=0\n"
+         #   reqq = reqq.replace('\n', '\r\n')
+         #   reqq += "\r\n"
+           # print(repr(reqq))
+          #  self.wfile.write(bytes(reqq,"ascii"))
+           # self.wfile.flush()
+           # return
+            #pass
+
         self.send_response(res.status)
         for k,v in res.headers.items():
             self.send_header(k,v)
@@ -203,7 +226,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             self.save_handler(req, req_body, res, res_body_plain)
 
     def relay_streaming(self, res):
-        self.wfile.write(bytes("%s %d %s\r\ns" % (self.protocol_version, res.status, res.reason),"utf-8"))
+        self.wfile.write(bytes("%s %d %s\r\n" % (self.protocol_version, res.status, res.reason),"utf-8"))
         for k,v in res.headers.items():
             self.send_header(k,v)
         self.end_headers()
@@ -294,7 +317,8 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         pass
 
     def save_handler(self, req, req_body, res, res_body):
-        self.print_info(req, req_body, res, res_body)
+        #self.print_info(req, req_body, res, res_body)
+        pass
 
 
 def test(HandlerClass=ProxyRequestHandler, ServerClass=ThreadingHTTPServer, protocol="HTTP/1.1"):
