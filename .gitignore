@@ -87,3 +87,5 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# Ignore the certs generated
