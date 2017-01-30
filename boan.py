@@ -19,14 +19,19 @@ Ui_MainWindow, QtBaseClass = uic.loadUiType(mainwindow_ui_file)
 waitCondition = QWaitCondition()
 mutex = QMutex()
 
-class PreferencesWindow(QDialog):
+class SettingsWindow(QDialog):
     def __init__(self):
-        super(PreferencesWindow, self).__init__()
-        uic.loadUi('preferences.ui', self)
+        super(SettingsWindow, self).__init__()
+        uic.loadUi('settings.ui', self)
+        self.settings = QSettings('settings.ini', QSettings.IniFormat)
+        self.loadSettings()
         self.show()
 
+    def loadSettings(self):
+        self.spinBox_port.setValue(int(self.settings.value("port", 8080)))
+
     def accept(self):
-        print("Clicked save")
+        self.settings.setValue("port",self.spinBox_port.value())
         self.close()
 
 class AboutWindow(QDialog):
@@ -36,7 +41,6 @@ class AboutWindow(QDialog):
         self.show()
 
     def accept(self):
-        print("Clicked save")
         self.close()
 
 class MyApp(QMainWindow, Ui_MainWindow):
@@ -45,15 +49,23 @@ class MyApp(QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
         self.px = ProxyThread() # Proxy Qthread
+        self.settings = QSettings('settings.ini', QSettings.IniFormat)
         self.connect()
         self.centerOnScreen()
 
     def connect(self):
+        #Shortcuts
         self.shortcut_quit = QShortcut(QKeySequence("Ctrl+Q"), self)
         self.shortcut_quit.activated.connect(self.on_quit)
-        self.actionPreferences.triggered.connect(self.do_preferences)
-        self.actionAbout.triggered.connect(self.do_about)
+        self.shortcut_settings = QShortcut(QKeySequence("Ctrl+Shift+S"), self)
+        self.shortcut_settings.activated.connect(self.do_settings)
 
+        #Menu
+        self.actionSettings.triggered.connect(self.do_settings)
+        self.actionAbout.triggered.connect(self.do_about)
+        self.actionQuit.triggered.connect(self.on_quit)
+
+        #Buttons
         self.pushButton_forward.clicked.connect(self.handleButton_forward)
         self.pushButton_power.clicked[bool].connect(self.handleButton_power)
         self.px.statusbarsignal.connect(self.update_statusbar)
@@ -64,13 +76,11 @@ class MyApp(QMainWindow, Ui_MainWindow):
         resolution = QDesktopWidget().screenGeometry()
         self.move((resolution.width() / 2) - (self.frameSize().width() / 2),(resolution.height() / 2) - (self.frameSize().height() / 2))
     
-    def do_preferences(self):
-        print("Opening Preferences")
-        dlg = PreferencesWindow()
+    def do_settings(self):
+        dlg = SettingsWindow()
         dlg.exec_()
 
     def do_about(self):
-        print("Opening Preferences")
         dlg = AboutWindow()
         dlg.exec_()
 
@@ -86,14 +96,12 @@ class MyApp(QMainWindow, Ui_MainWindow):
 
     def handleButton_power(self,isPressed):
         if isPressed:
-            self.px['port'] = self.spinBox_port.value()
+            self.px['port'] = int(self.settings.value("port", 8080))
             self.px.start()
-            self.spinBox_port.setEnabled(False)
             self.pushButton_power.setText("Running...")
         else:
             self.px.stop()
             self.pushButton_power.setText("Run")
-            self.spinBox_port.setEnabled(True)
             self.pushButton_forward.setEnabled(False)
 
     def update_statusbar(self,msg,msec):
@@ -105,12 +113,12 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.show()
         self.activateWindow()
 
-        self.box_body.appendPlainText(self.px.req.command+" "+self.px.req.path+" "+self.px.req.protocol_version);
+        self.box_body.append(self.px.req.command+" "+self.px.req.path+" "+self.px.req.protocol_version);
         for h in self.px.req.headers:
-            self.box_body.appendPlainText(h+": "+self.px.req.headers[h])
-        self.box_body.appendPlainText("") # newline
+            self.box_body.append(h+": "+self.px.req.headers[h])
+        self.box_body.append("") # newline
         if self.px.req_body:
-            self.box_body.appendPlainText(self.px.req_body.decode("utf-8"))
+            self.box_body.append(self.px.req_body.decode("utf-8"))
         self.pushButton_forward.setEnabled(True)
 
     def wakeup(self):
