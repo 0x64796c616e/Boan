@@ -23,7 +23,7 @@ class SettingsWindow(QDialog):
     def __init__(self):
         super(SettingsWindow, self).__init__()
         uic.loadUi('settings.ui', self)
-        self.settings = QSettings('settings.ini', QSettings.IniFormat)
+        self.settings = QSettings("Boan", "Boan")
         self.loadSettings()
         self.show()
 
@@ -49,7 +49,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
         self.px = ProxyThread() # Proxy Qthread
-        self.settings = QSettings('settings.ini', QSettings.IniFormat)
+        self.settings = QSettings("Boan", "Boan")
         self.connect()
         self.centerOnScreen()
 
