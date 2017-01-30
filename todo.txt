@@ -2,6 +2,7 @@
 	commonly used for webfonts https://github.com/google/brotli/tree/master/python
 
 - add feature: ignore certain extensions like .css or jpeg
+-- add inscope / out of scope urls
 
 - Create a deb installer
 	https://pypi.python.org/pypi/stdeb#python-3-support

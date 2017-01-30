@@ -38,6 +38,7 @@ class AboutWindow(QDialog):
     def __init__(self):
         super(AboutWindow, self).__init__()
         uic.loadUi('about.ui', self)
+        self.textBrowser.setSource(QUrl("resources/about.htm"))
         self.show()
 
     def accept(self):
@@ -127,6 +128,10 @@ class MyApp(QMainWindow, Ui_MainWindow):
 class PX(proxy.ProxyRequestHandler):
 
     def request_handler(self, req, req_body):
+
+        if req.headers['Host'] not in ["example.com"]:
+            return
+
         self.reqsignal.emit()
         self.pt.req = req
         self.pt.req_body = req_body
