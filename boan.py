@@ -13,7 +13,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-mainwindow_ui_file = "g.ui" #Qt XML ui file.
+mainwindow_ui_file = "resources/g.ui" #Qt XML ui file.
 Ui_MainWindow, QtBaseClass = uic.loadUiType(mainwindow_ui_file)
 
 waitCondition = QWaitCondition()
@@ -22,7 +22,7 @@ mutex = QMutex()
 class SettingsWindow(QDialog):
     def __init__(self):
         super(SettingsWindow, self).__init__()
-        uic.loadUi('settings.ui', self)
+        uic.loadUi('resources/settings.ui', self)
         self.settings = QSettings("Boan", "Boan")
         self.loadSettings()
         self.show()
@@ -37,7 +37,7 @@ class SettingsWindow(QDialog):
 class AboutWindow(QDialog):
     def __init__(self):
         super(AboutWindow, self).__init__()
-        uic.loadUi('about.ui', self)
+        uic.loadUi('resources/about.ui', self)
         self.textBrowser.setSource(QUrl("resources/about.htm"))
         self.show()
 
