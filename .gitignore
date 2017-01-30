@@ -88,6 +88,3 @@ ENV/
 # Rope project settings
 .ropeproject
 
-# Ignore the generated certs in the certs/ directory 
-certs/*
-!*.gitkeep
