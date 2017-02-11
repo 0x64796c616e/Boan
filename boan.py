@@ -29,9 +29,13 @@ class SettingsWindow(QDialog):
 
     def loadSettings(self):
         self.spinBox_port.setValue(int(self.settings.value("port", 8080)))
+        self.filter_filetypes.setPlainText(self.settings.value("filter_filetypes", ".css, .gif, .ico, .png"))
+        self.filter_hosts.setPlainText(self.settings.value("filter_hosts"))
 
     def accept(self):
         self.settings.setValue("port",self.spinBox_port.value())
+        self.settings.setValue("filter_filetypes",self.filter_filetypes.toPlainText())
+        self.settings.setValue("filter_hosts",self.filter_hosts.toPlainText())
         self.close()
 
 class AboutWindow(QDialog):
@@ -76,7 +80,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
         '''centerOnScreen() Centers the window on the screen.'''
         resolution = QDesktopWidget().screenGeometry()
         self.move((resolution.width() / 2) - (self.frameSize().width() / 2),(resolution.height() / 2) - (self.frameSize().height() / 2))
-    
+
     def do_settings(self):
         dlg = SettingsWindow()
         dlg.exec_()
@@ -90,7 +94,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
 
     def handleButton_forward(self):
         self.pushButton_forward.setEnabled(False)
-        self.px.raw_req = self.box_body.toPlainText() 
+        self.px.raw_req = self.box_body.toPlainText()
         self.box_body.clear()
         self.wakeup()
         return
@@ -127,32 +131,40 @@ class MyApp(QMainWindow, Ui_MainWindow):
 
 class PX(proxy.ProxyRequestHandler):
 
+    settings = QSettings("Boan", "Boan")
+
     def request_handler(self, req, req_body):
 
-        if req.headers['Host'] not in ["example.com"]:
+        filter_hosts= self.settings.value("filter_hosts")
+        if filter_hosts and (req.headers['Host'] not in filter_hosts):
             return
 
-        self.reqsignal.emit()
+        filter_filetypes= self.settings.value("filter_filetypes").split(", ")
+        if any([x in req.path for x in filter_filetypes]):
+            return
+
         self.pt.req = req
         self.pt.req_body = req_body
+        self.reqsignal.emit()
+
 
         mutex.lock()
         waitCondition.wait(mutex)
         mutex.unlock()
-        
+
         # Parse the raw request and map onto the httpreq object
         raw = self.pt.raw_req.split('\n')
         req.raw_req = self.pt.raw_req
-        try:  
+        try:
             req.command, req.path, req.protocol_version = raw[0].split()
         except Exception as e:
             self.send_error(400)
-        
+
         for c in range(1,len(raw)):
             #print(c,raw[c])
             if raw[c] == '': # the newline
                 break
-            try:  
+            try:
                 h,v = raw[c].split(': ')
             except Exception as e:
                 self.send_error(400)
