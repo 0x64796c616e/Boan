@@ -18,7 +18,7 @@ or
 ```
 The above command runs the proxy on tcp/8080. To use another port, specify the port number in settings. Also in settings, you can black list filetypes or white list in-scope hosts.
 
-Set you default network manager to use the proxy on the specified port. On Linux: Network --> Network Proxy --> Manual
+Set your default network manager to use the proxy on the specified port. On Linux: Network --> Network Proxy --> Manual
 
 ![netowrk instalation](http://i63.tinypic.com/2i1321f.png)
 
@@ -28,7 +28,9 @@ To intercept HTTPS connections, generate private keys and a private CA certifica
 
  $ ./setup_https_intercept.sh
 
-With the proxy running, browse to http://boan.cert/ nd install the CA certificate in the browsers.
+With the proxy running, browse to http://boan.cert/ and install the CA certificate in the browsers.
+
+
 
 
 
